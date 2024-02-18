@@ -1,0 +1,205 @@
+version: '3.1'
+
+services:
+  octoprint:
+    image: octoprint/octoprint
+    restart: unless-stopped
+    container_name: octoprint
+    ports:
+      - 8000:80
+    devices:
+     # use `python -m serial.tools.miniterm` to see what the name is of the printer
+     - /dev/ttyACM0:/dev/ttyACM0
+     #- /dev/ttyUSB0:/dev/USB0
+     # - /dev/video1:/dev/video1
+     # - /dev/ttyprintk:/dev/ttyprintk
+    volumes:
+     - ./octoprint:/octoprint
+    # uncomment the lines below to ensure camera streaming is enabled when
+    # you add a video device
+    #environment:
+    # - ENABLE_MJPG_STREAMER=true
+  octoprint2:
+    #name: octoprint2
+    image: octoprint/octoprint
+    restart: unless-stopped
+    container_name: octoprint2
+    ports:
+       - 8001:80
+    devices:
+     # use `python -m serial.tools.miniterm` to see what the name is of the printer
+     #- /dev/ttyACM0:/dev/ttyACM0
+     #- /dev/serial/by-id/usb-1a86_USB_Serial-if00-port0:/dev/ttyUSB0
+     - /dev/ttyUSB0:/dev/ttyUSB0
+     - /dev/video1:/dev/video1
+     # - /dev/ttyprintk:/dev/ttyprintk
+    volumes:
+       - octoprint2:/octoprint
+   # uncomment the lines below to ensure camera streaming is enabled when
+   # you add a video device
+    environment:
+       - ENABLE_MJPG_STREAMER=true
+       - MJPG_STREAMER_INPUT=-n -r 1920x1080 -f 30
+       - CAMERA_DEV=/dev/video0
+
+  pihole:
+    image: pihole/pihole
+    restart: unless-stopped
+    container_name: pihole
+    ports:
+      - 7000:80
+      - 7001:443
+      - 53:53
+    volumes:
+      - pihole_app:/etc/pihole
+      - dns_config:/etc/dnsmasq.d
+  portainer:
+    image: portainer/portainer-ce:latest
+    restart: always
+    container_name: portainer
+    ports:
+      - 9443:9443
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+  watchtower:
+    image: containrrr/watchtower:latest
+    restart: unless-stopped
+    container_name: watchtower
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+  ####
+  # uncomment if you wish to edit the configuration files of octoprint
+  # refer to docs on configuration editing for more information
+  ####
+#  plex:
+#    image: linuxserver/plex
+#    container_name: plex
+#    network_mode: host
+#    environment:
+#      - PUID=1000
+#      - PGID=1000
+#      - VERSION=docker
+#      - PLEX_CLAIM= #optional
+#    volumes:
+#      - /home/pi/Containers/plex:/config
+#      - /path/to/tvseries:/tv
+#      - /path/to/movies:/movies
+#    restart: unless-stopped
+  #config-editor:
+  #  image: linuxserver/code-server
+  #  ports:
+  #    - 8443:8443
+  #  depends_on:
+  #    - octoprint
+  #  restart: unless-stopped
+  #  environment:
+  #    - PUID=0
+  #    - GUID=0
+  #    - TZ=America/Chicago
+  #  volumes:
+  #    - octoprint:/octoprint
+  apache:
+   image: httpd
+   container_name: apache
+   ports:
+    - 80:80
+    - 443:443
+   volumes:
+    - ./public-html/:/usr/local/apache2/htdocs
+    - ./certs:/certs
+
+  homeassistant:
+   container_name: homeassistant
+   image: "ghcr.io/home-assistant/home-assistant:stable"
+   ports:
+    - 8123:8123
+   volumes:
+    - /home/pi/Containers/HomeAssistant:/config
+    - /etc/localtime:/etc/localtime:ro
+   restart: unless-stopped
+   privileged: true
+
+  pinry:
+   container_name: pinry
+   image: getpinry/pinry
+   volumes:
+    - ./pinry:/data
+   ports:
+    - 5335:80
+  
+  checkmk:
+    image: checkmk/check-mk-cloud
+    restart: unless-stopped
+    container_name: checmk
+    ports:
+      - 9090:5000
+      - 9000:8000
+    tmpfs:
+      - /opt/omd/sites/cmk/tmp:uid=1000,gid=1000
+    ulimits:
+      nofile: 1024
+    volumes:
+     - ./monitoring:/omd/sites
+     - /etc/localtime:/etc/localtime:ro
+#    networks:
+#     checkmk_network:
+#networks:
+#   checkmk_network:
+  klipper:
+    image: dimalo/klipper-moonraker
+    build:
+      dockerfile: ./klipper/Dockerfile
+      context: .
+    # if klipper cannot connect to the printer check permissions on rpi then add the group here
+    # group_add:
+    #   - "996"
+    #   - "998"
+    cap_add:
+      - SYS_NICE
+    container_name: klipper
+    ports:
+      - 7125:7125
+    restart: unless-stopped
+    volumes:
+      - ./gcode_files:/home/klippy/gcode_files
+      # be aware to create your own branch if you mount the config folder as it will be updated on the main branch
+      # that way you can merge upstream changes to your customized configs
+      - ./config:/home/klippy/.config
+      - moonraker_data:/home/klippy/.moonraker_database
+      #- ./config2:/home/klippy/printer_data/config
+      # - <<your_config_path>>:/home/klippy/.config
+      # - ./printer.cfg:/home/klippy/.config/printer.cfg
+    # mount serial device - take care to grant sufficient permissions to the device: <host_dev>:<container_dev>
+    # put <container_dev> into your printer.cfg
+    devices:
+      #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
+      - /dev/ttyUSB1:/dev/ttyUSB0
+      - /dev/video0:/dev/video0
+      #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
+  fluidd:
+    image: dimalo/fluidd
+    # build:
+    #   dockerfile: Dockerfile
+    #   context: frontend
+    restart: unless-stopped
+    container_name: fluidd
+    ports:
+      - 8010:80
+    depends_on: 
+      - klipper
+      # - klipper_another_printer
+    links:
+      - klipper:klipper
+      # - klipper_another_printer:klipper_another_printer
+
+volumes:
+ octoprint:
+ portainer_data:
+ pihole_app:
+ dns_config:
+ nextcloud:
+ nextcloud-db:
+ octoprint2:
+ gcode_files:
+ moonraker_data:
