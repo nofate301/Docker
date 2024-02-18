@@ -12,10 +12,10 @@ services:
     volumes:
       - pihole_app:/etc/pihole
       - dns_config:/etc/dnsmasq.d
-  portainer:
+  portainer2:
     image: portainer/portainer-ce:latest
     restart: always
-    container_name: portainer
+    container_name: portainer2
     ports:
       - 9445:9443
     volumes:
