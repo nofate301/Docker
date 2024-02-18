@@ -6,29 +6,29 @@ services:
     restart: unless-stopped
     container_name: pihole
     ports:
-      - 7000:80
-      - 7001:443
-      - 53:53
+      7000:80
+      7001:443
+      53:53
     volumes:
-      - pihole_app:/etc/pihole
-      - dns_config:/etc/dnsmasq.d
+      pihole_app:/etc/pihole
+      dns_config:/etc/dnsmasq.d
   portainer2:
     image: portainer/portainer-ce:latest
     restart: always
     container_name: portainer2
     ports:
-      - 9445:9443
+      9445:9443
     volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - portainer_data:/data
+      /var/run/docker.sock:/var/run/docker.sock
+      portainer_data:/data
   homeassistant:
    container_name: homeassistant
    image: "ghcr.io/home-assistant/home-assistant:stable"
    ports:
-    - 8123:8123
+    8123:8123
    volumes:
-    - /home/pi/Containers/HomeAssistant:/config
-    - /etc/localtime:/etc/localtime:ro
+    /home/pi/Containers/HomeAssistant:/config
+    /etc/localtime:/etc/localtime:ro
    restart: unless-stopped
    privileged: true
 
@@ -36,9 +36,9 @@ services:
    container_name: pinry
    image: getpinry/pinry
    volumes:
-    - ./pinry:/data
+    ./pinry:/data
    ports:
-    - 5335:80
+    5335:80
   
   klipper:
     image: dimalo/klipper-moonraker
@@ -46,27 +46,27 @@ services:
     dockerfile: ./klipper/Dockerfile
     context: .
     cap_add:
-      - SYS_NICE
+      SYS_NICE
     container_name: klipper
     ports:
-      - 7125:7125
+      7125:7125
     restart: unless-stopped
     volumes:
-      - ./gcode_files:/home/klippy/gcode_files
+      ./gcode_files:/home/klippy/gcode_files
+      ./config:/home/klippy/.config
+      - moonraker_data:/home/klippy/.moonraker_database
       # be aware to create your own branch if you mount the config folder as it will be updated on the main branch
       # that way you can merge upstream changes to your customized configs
-      - ./config:/home/klippy/.config
-      - moonraker_data:/home/klippy/.moonraker_database
-      #- ./config2:/home/klippy/printer_data/config
-      # - <<your_config_path>>:/home/klippy/.config
-      # - ./printer.cfg:/home/klippy/.config/printer.cfg
-    # mount serial device - take care to grant sufficient permissions to the device: <host_dev>:<container_dev>
+      #./config2:/home/klippy/printer_data/config
+      # <<your_config_path>>:/home/klippy/.config
+      # ./printer.cfg:/home/klippy/.config/printer.cfg
+    # mount serial device take care to grant sufficient permissions to the device: <host_dev>:<container_dev>
     # put <container_dev> into your printer.cfg
     devices:
-      #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
-      - /dev/ttyUSB1:/dev/ttyUSB0
-      - /dev/video0:/dev/video0
-      #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
+      #/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
+      /dev/ttyUSB1:/dev/ttyUSB0
+      /dev/video0:/dev/video0
+      #/dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
   fluidd:
     image: dimalo/fluidd
     # build:
@@ -75,13 +75,13 @@ services:
     restart: unless-stopped
     container_name: fluidd
     ports:
-      - 8010:80
+      8010:80
     depends_on: 
-      - klipper
-      # - klipper_another_printer
+      klipper
+      # klipper_another_printer
     links:
-      - klipper:klipper
-      # - klipper_another_printer:klipper_another_printer
+      klipper:klipper
+      # klipper_another_printer:klipper_another_printer
 
 volumes:
   octoprint:
