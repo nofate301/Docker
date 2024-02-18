@@ -40,18 +40,18 @@ services:
    ports:
     - 5335:80
   
-klipper:
-  image: dimalo/klipper-moonraker
-  build:
-  dockerfile: ./klipper/Dockerfile
-  context: .
-  cap_add:
+  klipper:
+    image: dimalo/klipper-moonraker
+    build:
+    dockerfile: ./klipper/Dockerfile
+    context: .
+    cap_add:
       - SYS_NICE
-  container_name: klipper
-  ports:
+    container_name: klipper
+    ports:
       - 7125:7125
-  restart: unless-stopped
-  volumes:
+    restart: unless-stopped
+    volumes:
       - ./gcode_files:/home/klippy/gcode_files
       # be aware to create your own branch if you mount the config folder as it will be updated on the main branch
       # that way you can merge upstream changes to your customized configs
@@ -62,25 +62,25 @@ klipper:
       # - ./printer.cfg:/home/klippy/.config/printer.cfg
     # mount serial device - take care to grant sufficient permissions to the device: <host_dev>:<container_dev>
     # put <container_dev> into your printer.cfg
-  devices:
+    devices:
       #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
       - /dev/ttyUSB1:/dev/ttyUSB0
       - /dev/video0:/dev/video0
       #- /dev/serial/by-path/platform-fd500000.pcie-pci-0000:01:00.0-usb-0:1.2:1.0-port0:/dev/ttyUSB0
-fluidd:
-  image: dimalo/fluidd
+  fluidd:
+    image: dimalo/fluidd
     # build:
     #   dockerfile: Dockerfile
     #   context: frontend
-  restart: unless-stopped
-  container_name: fluidd
-  ports:
-    - 8010:80
-  depends_on: 
-    - klipper
+    restart: unless-stopped
+    container_name: fluidd
+    ports:
+      - 8010:80
+    depends_on: 
+      - klipper
       # - klipper_another_printer
-  links:
-    - klipper:klipper
+    links:
+      - klipper:klipper
       # - klipper_another_printer:klipper_another_printer
 
 volumes:
