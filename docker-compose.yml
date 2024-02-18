@@ -84,12 +84,12 @@ services:
       # - klipper_another_printer:klipper_another_printer
 
 volumes:
- octoprint:
- portainer_data:
- pihole_app:
- dns_config:
- nextcloud:
- nextcloud-db:
- octoprint2:
- gcode_files:
- moonraker_data:
+  octoprint:
+  portainer_data:
+  pihole_app:
+  dns_config:
+  nextcloud:
+  nextcloud-db:
+  octoprint2:
+  gcode_files:
+  moonraker_data:
