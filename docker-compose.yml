@@ -25,10 +25,10 @@ services:
    container_name: homeassistant
    image: "ghcr.io/home-assistant/home-assistant:stable"
    ports:
-    8123:8123
+      8123:8123
    volumes:
-    /home/pi/Containers/HomeAssistant:/config
-    /etc/localtime:/etc/localtime:ro
+      /home/pi/Containers/HomeAssistant:/config
+      /etc/localtime:/etc/localtime:ro
    restart: unless-stopped
    privileged: true
 
@@ -54,7 +54,7 @@ services:
     volumes:
       ./gcode_files:/home/klippy/gcode_files
       ./config:/home/klippy/.config
-      - moonraker_data:/home/klippy/.moonraker_database
+      moonraker_data:/home/klippy/.moonraker_database
       # be aware to create your own branch if you mount the config folder as it will be updated on the main branch
       # that way you can merge upstream changes to your customized configs
       #./config2:/home/klippy/printer_data/config
