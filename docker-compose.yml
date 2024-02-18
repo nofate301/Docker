@@ -80,7 +80,7 @@ services:
       klipper
       # klipper_another_printer
     links:
-      klipper:klipper
+      - klipper:klipper
       # klipper_another_printer:klipper_another_printer
 
 volumes:
