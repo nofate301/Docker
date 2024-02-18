@@ -17,7 +17,7 @@ services:
     restart: always
     container_name: portainer2
     ports:
-      9445:9443
+      - 9445:9443
     volumes:
       /var/run/docker.sock:/var/run/docker.sock
       portainer_data:/data
