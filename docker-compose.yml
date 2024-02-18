@@ -77,7 +77,7 @@ services:
     ports:
       - 8010:80
     depends_on: 
-      klipper
+      - klipper
       # klipper_another_printer
     links:
       - klipper:klipper
