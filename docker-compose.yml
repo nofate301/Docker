@@ -6,9 +6,9 @@ services:
     restart: unless-stopped
     container_name: pihole
     ports:
-      7000:80
-      7001:443
-      53:53
+      - 7000:80
+      - 7001:443
+      - 53:53
     volumes:
       pihole_app:/etc/pihole
       dns_config:/etc/dnsmasq.d
